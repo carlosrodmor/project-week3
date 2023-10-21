@@ -1,17 +1,14 @@
 class Platforms {
-    constructor(gameSize, gameScreen, alto, ancho) {
+    constructor(gameSize, gameScreen, platform, player) {
         this.gameSize = gameSize
         this.gameScreen = gameScreen
-        this.position = {
-            horizontalPos: ancho,
-            verticalPos: alto
-        },
-            this.platformSize = { width: 200, heigth: 50 }
-        //this.positions = { left: 0, top: 500 }
+        this.playerReference = player
+        this.position = { horizontalPos: platform.x, verticalPos: platform.y }
+        this.platformSize = { width: platform.w, heigth: platform.h }
+        this.speed = 10
         this.init()
     }
     init() {
-        console.log("INIT DE PLATAFORMAS")
 
         this.platformElement = document.createElement("div")
         this.platformElement.style.backgroundColor = "white"
@@ -19,8 +16,25 @@ class Platforms {
         this.platformElement.style.position = "absolute"
         this.platformElement.style.width = `${this.platformSize.width}px`
         this.platformElement.style.height = `${this.platformSize.heigth}px`
-        this.platformElement.style.top = `${this.gameSize.h - this.position.verticalPos}px`
-        this.platformElement.style.left = `${this.gameSize.w - this.position.horizontalPos}px`
+        this.platformElement.style.top = `${this.position.verticalPos}px`
+        this.platformElement.style.left = `${this.position.horizontalPos}px`
         this.gameScreen.appendChild(this.platformElement)
+    }
+
+    moveRight() {
+        if (this.playerReference.playerPos.left >= this.gameSize.w / 2) {
+            this.position.horizontalPos -= this.speed
+            this.updatePos()
+        }
+    }
+    moveLeft() {
+        if (this.playerReference.playerPos.left <= 50) {
+            this.position.horizontalPos += this.speed
+            this.updatePos()
+        }
+    }
+
+    updatePos() {
+        this.platformElement.style.left = `${this.position.horizontalPos}px`
     }
 }
