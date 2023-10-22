@@ -8,10 +8,15 @@ const Game = {
     },
     player: undefined,
     background: undefined,
-
+    bases: [],
     objects: [],
     //nonStaticObject: [],   ====> Siguiente iteracion
 
+    keys: {
+        LEFT: { code: "ArrowLeft", pressed: false },
+        RIGHT: { code: "ArrowRight", pressed: false },
+        UP: { code: "ArrowUp" }
+    },
 
     init() {
         this.setDimensions()
@@ -26,17 +31,35 @@ const Game = {
 
     setEventListeners() {
         document.onkeydown = (e) => {
+            //console.log("Tecla presionada")
+            switch (e.code) {
+                case this.keys.RIGHT.code:
+                    this.keys.RIGHT.pressed = true
+                    break;
 
-            if (e.code === "ArrowRight") {
-                this.objects.forEach(elm => elm.moveRight())
-                this.player.moveRight()
+                case this.keys.LEFT.code:
+                    this.keys.LEFT.pressed = true
+                    break;
+
+                case this.keys.UP.code:
+                    this.player.jump()
+                    break;
             }
-            if (e.code === "ArrowLeft") {
-                this.objects.forEach(elm => elm.moveLeft())
-                this.player.moveLeft()
-            }
-            if (e.code === "ArrowUp") {
-                this.player.jump()
+
+            document.onkeyup = (e) => {
+                //console.log("Tecla levantada")
+                switch (e.code) {
+                    case this.keys.RIGHT.code:
+                        this.keys.RIGHT.pressed = false
+                        //console.log(this.keys.RIGHT.pressed)
+
+                        break;
+
+                    case this.keys.LEFT.code:
+                        this.keys.LEFT.pressed = false
+                        //console.log(this.keys.LEFT.pressed)
+                        break;
+                }
             }
         }
     },
@@ -44,15 +67,15 @@ const Game = {
     createObjects() {
         this.background = new Background(this.gameSize, this.gameScreen)
         this.player = new Player(this.gameSize, this.gameScreen)
-        platformDimensions.forEach(elm => {
-            this.objects.push(new Platforms(this.gameSize, this.gameScreen, elm, this.player))
-        })
+
+        platforms.forEach(elm => this.objects.push(new Platforms(this.gameSize, this.gameScreen, elm, this.player)))
+
+        base.forEach(elm => this.bases.push(new Base(this.gameSize, this.gameScreen, elm, this.player)))
+
         /*  ====> Siguiente iteracion <====
         nonStaticPlatform.forEach(elm => {
             this.nonStaticObject.push = new movePlatform(this.gameSize, this.gameScreen, elm, this.player)
         })*/
-
-
     },
 
     start() {
@@ -61,17 +84,38 @@ const Game = {
     },
 
     gameLoop() {
-        if (this.player.playerPos.top < this.gameScreen.h) { //esta en el aire
-            console.log("if se ha cumplido")
-            this.player.gravity()
-        }
+        this.moveAll()
         window.requestAnimationFrame(() => this.gameLoop())
     },
 
-    //drawAll() ===> metodo con logica de mover personaje y mapa 
+    moveAll() {
+        this.player.move(this.keys)
+        this.bases.forEach(elm => elm.move(this.keys))
+        this.objects.forEach(elm => elm.move(this.keys))
+        if (this.checkCollision()) {
+            console.log(true)
+        }
+    },
 
-    //clearAll() ===> metodo con el que eliminamos elementos fuera de pantalla
-
+    checkCollision() {
+        console.log("mi base es", this.player.playerPos.base)
+        let flag = false
+        this.objects.forEach((elm, index) => {
+            if (this.player.playerPos.left + this.player.playerSize.w >= elm.position.horizontalPos &&
+                this.player.playerPos.left <= elm.position.horizontalPos + elm.platformSize.width &&
+                this.player.playerPos.top + this.player.playerSize.h < elm.position.verticalPos
+            ) {
+                this.player.playerPos.base = this.objects[index].position.verticalPos - this.player.playerSize.h
+                //console.log("estoy encima de la plataforma ", index, "y mi base es", this.player.playerPos.base)
+                flag = true
+            } else if (
+                this.player.playerPos.left + this.player.playerSize.w < elm.position.horizontalPos &&
+                this.player.playerPos.left > elm.position.horizontalPos + elm.platformSize.width) {
+                this.player.playerPos.base = this.player.gameSize.h - this.player.playerSize.h - 50
+            }
+        })
+        return flag
+    }
     //gameOver() {
     //alert('GAME OVER')
     //}

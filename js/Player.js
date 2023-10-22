@@ -11,12 +11,14 @@ class Player {
         }
         this.playerPos = {
             left: 30,
-            top: this.gameSize.h - 100,
+            top: this.gameSize.h - this.playerSize.h - 50,
+            base: this.gameSize.h - this.playerSize.h - 50
         }
         this.playerVel = {
-            left: 8,
-            top: 5,
-            gravity: 0.4
+            left: 10,
+            top: 150,
+            gravity: .5,
+            maxVel: 150 + this.playerSize.h
         }
 
         this.init()
@@ -34,6 +36,7 @@ class Player {
         this.playerElement.style.top = `${this.playerPos.top}px`
 
         this.gameScreen.appendChild(this.playerElement)
+        //this.playerElement.classList.add("player")
     }
     moveLeft() {
         if (this.playerPos.left > 20) {
@@ -43,31 +46,42 @@ class Player {
 
     }
     moveRight() {
-        if (this.playerPos.left <= this.gameSize.w / 2) {
+        if (this.playerPos.left <= this.gameSize.w - this.playerSize.w - 30) {
             this.playerPos.left += this.playerVel.left
             this.updatePosition()
         }
 
     }
+    //si el bicho esta en la base, 
     jump() {
-        this.playerPos.top -= this.playerVel.top
-        this.updatePosition()
-        //      if (this.playerPos.top <= this.gameSize.h - 100) {}
-
-
-
-
-
+        if (this.onBase()) {
+            this.playerPos.top -= this.playerVel.top //da un salto 
+            this.playerVel.top = 1 //velocidad de salto = 1
+            this.updatePosition()
+        }
     }
-
-    gravity() {
-
-        this.playerPos.top += this.playerVel.top
-        this.playerVel.top += this.playerVel.gravity
-        this.updatePosition()
+    onBase() {
+        return this.playerPos.top >= this.playerPos.base
     }
 
 
+    move(keys) {
+        if (!this.onBase()) {
+            console.log("mi base es", this.playerPos.base)
+            //console.log("Vel actual es:", this.playerVel.top) //mientras está cayendo recupera velocidad
+            this.playerVel.top += this.playerVel.gravity;
+            this.playerPos.top += this.playerVel.top
+
+        } else if (this.playerVel.top < this.playerVel.maxVel) {  //si llega a la base recupera su fuerza de salto
+            this.playerVel.top = this.playerVel.maxVel
+        }
+
+        keys.RIGHT.pressed && this.moveRight()
+        keys.LEFT.pressed && this.moveLeft()
+
+        this.updatePosition()
+
+    }
 
     updatePosition() {
         this.playerElement.style.left = `${this.playerPos.left}px`

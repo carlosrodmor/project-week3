@@ -2,8 +2,6 @@ class Background {
 
     constructor(gameSize, gameScreen) {
         this.gameScreen = gameScreen
-        //this.gameSize = size
-        //alert(`ancho: ${gameSize.w}px alto: ${gameSize.h}px`)
 
         this.backgroundSize = {
             width: gameSize.w,
@@ -17,8 +15,6 @@ class Background {
 
 
     init() {
-        console.log("INIT DEL BACKGR")
-
         this.backgroundElement = document.createElement("div")
         //this.backgroundElement.src = "./img/gradient.jpg"
         this.backgroundElement.style.backgroundColor = "green"

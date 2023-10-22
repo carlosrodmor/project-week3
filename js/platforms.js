@@ -18,6 +18,7 @@ class Platforms {
         this.platformElement.style.height = `${this.platformSize.heigth}px`
         this.platformElement.style.top = `${this.position.verticalPos}px`
         this.platformElement.style.left = `${this.position.horizontalPos}px`
+
         this.gameScreen.appendChild(this.platformElement)
     }
 
@@ -28,13 +29,20 @@ class Platforms {
         }
     }
     moveLeft() {
-        if (this.playerReference.playerPos.left <= 50) {
+        if (this.playerReference.playerPos.left <= this.gameSize.w * .2) {
             this.position.horizontalPos += this.speed
             this.updatePos()
         }
     }
-
+    move(keys) {
+        keys.RIGHT.pressed && this.moveRight()
+        keys.LEFT.pressed && this.moveLeft()
+    }
     updatePos() {
         this.platformElement.style.left = `${this.position.horizontalPos}px`
+        this.platformElement.style.top = `${this.position.verticalPos}px`
     }
+
+
 }
+
