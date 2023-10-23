@@ -8,12 +8,8 @@ const Game = {
     },
     player: undefined,
     background: undefined,
-    isOnPlatform: false,
     currentPlatform: undefined,
-    bases: [],
     objects: [],
-    //nonStaticObject: [],   ====> Siguiente iteracion
-
     keys: {
         LEFT: { code: "ArrowLeft", pressed: false },
         RIGHT: { code: "ArrowRight", pressed: false },
@@ -72,12 +68,6 @@ const Game = {
 
         platforms.forEach(elm => this.objects.push(new Platforms(this.gameSize, this.gameScreen, elm, this.player)))
 
-        //base.forEach(elm => this.bases.push(new Base(this.gameSize, this.gameScreen, elm, this.player)))
-
-        /*  ====> Siguiente iteracion <====
-        nonStaticPlatform.forEach(elm => {
-            this.nonStaticObject.push = new movePlatform(this.gameSize, this.gameScreen, elm, this.player)
-        })*/
     },
 
     start() {
@@ -90,45 +80,17 @@ const Game = {
         window.requestAnimationFrame(() => this.gameLoop())
     },
 
+    playerSelector: document.getElementById("player"),
+
     moveAll() {
-        this.player.move(this.keys)
-        this.bases.forEach(elm => elm.move(this.keys))
-        this.objects.forEach(elm => elm.move(this.keys))
-        this.checkPlatform()
         this.isCollision()
-    },
-    /*isCollision() {
-        this.isOnPlatform = this.objects.some(eachObj => {
-            return (eachObj.position.horizontalPos < this.player.playerPos.left + this.player.playerSize.w &&
-                eachObj.position.horizontalPos + eachObj.platformSize.width > this.player.playerPos.left &&
-                //eachObj.position.verticalPos < this.player.playerPos.top + this.player.playerSize.h // esta debajo
-                eachObj.position.verticalPos > this.player.playerPos.top)
-        })
-        console.log(this.isOnPlatform)
-    },*/
-    isCollision() {
-        if (this.isOnPlatform) {
-            console.log(this.currentPlatform)
-            //this.player.base = this.currentPlatform.position.verticalPos
-        } else {
-            this.player.base = this.gameSize.h - this.player.playerSize.h - 50
-        }
+        this.player.move(this.keys)
+        this.objects.forEach(elm => elm.move(this.keys))
+
     },
 
-    checkPlatform() {
-        this.objects.some(eachObj => {
-            if (eachObj.position.horizontalPos < this.player.playerPos.left + this.player.playerSize.w &&
-                eachObj.position.horizontalPos + eachObj.platformSize.width > this.player.playerPos.left &&
-                //eachObj.position.verticalPos < this.player.playerPos.top + this.player.playerSize.h // esta debajo
-                eachObj.position.verticalPos > this.player.playerPos.top) {
-                this.isOnPlatform = true
-                this.checkPlatform = eachObj
-                console.log(this.isOnPlatform)
-            }
-        })
+    isCollision() {
+
     }
 }
 
-// this.nonStaticObject.forEach(elm => {
-//   console.log(elm)
-//dejamos de momento para proxima iteracion

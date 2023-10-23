@@ -1,6 +1,6 @@
 class Player {
     constructor(gameSize, gameScreen, keys) {
-
+        console.log(gameSize.h)
         this.gameSize = gameSize
         this.gameScreen = gameScreen
         this.keys = keys
@@ -18,9 +18,9 @@ class Player {
         this.base = this.gameSize.h - this.playerSize.h - 50
 
         this.playerVel = {
-            left: 10,
+            left: 8,
             top: 250,
-            gravity: .5,
+            gravity: 1,
             maxVel: 250 + this.playerSize.h
         }
 
@@ -39,6 +39,7 @@ class Player {
         this.playerElement.style.top = `${this.playerPos.top}px`
 
         this.gameScreen.appendChild(this.playerElement)
+        this.playerElement.setAttribute("id", "player")
     }
     moveLeft() {
         if (this.playerPos.left > 20) {
@@ -57,13 +58,13 @@ class Player {
     //si el bicho esta en la base, 
     jump() {
         if (this.onBase()) {
-            this.playerPos.top -= this.playerVel.top //da un salto 
-            this.playerVel.top = 1//velocidad de salto = 1
+            this.playerPos.top -= this.playerVel.top      //da un salto 
+            this.playerVel.top = 5       //velocidad de salto = 1
             this.updatePosition()
         }
     }
     onBase() {
-        return this.playerPos.top >= this.base
+        return (this.playerPos.top) >= this.base
     }
 
 

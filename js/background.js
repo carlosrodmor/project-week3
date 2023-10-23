@@ -16,7 +16,6 @@ class Background {
 
     init() {
         this.backgroundElement = document.createElement("div")
-        //this.backgroundElement.src = "./img/gradient.jpg"
         this.backgroundElement.style.backgroundColor = "green"
 
         this.backgroundElement.style.position = "absolute"
