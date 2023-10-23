@@ -6,10 +6,12 @@ const Game = {
         w: window.innerWidth,
         h: window.innerHeight
     },
+
     player: undefined,
     background: undefined,
     currentPlatform: undefined,
     objects: [],
+
     keys: {
         LEFT: { code: "ArrowLeft", pressed: false },
         RIGHT: { code: "ArrowRight", pressed: false },
@@ -65,7 +67,6 @@ const Game = {
     createObjects() {
         this.background = new Background(this.gameSize, this.gameScreen)
         this.player = new Player(this.gameSize, this.gameScreen)
-
         platforms.forEach(elm => this.objects.push(new Platforms(this.gameSize, this.gameScreen, elm, this.player)))
 
     },
@@ -80,17 +81,13 @@ const Game = {
         window.requestAnimationFrame(() => this.gameLoop())
     },
 
-    playerSelector: document.getElementById("player"),
-
     moveAll() {
         this.isCollision()
         this.player.move(this.keys)
         this.objects.forEach(elm => elm.move(this.keys))
-
     },
 
     isCollision() {
-
     }
 }
 
