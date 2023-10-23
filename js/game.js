@@ -8,6 +8,8 @@ const Game = {
     },
     player: undefined,
     background: undefined,
+    isOnPlatform: false,
+    currentPlatform: undefined,
     bases: [],
     objects: [],
     //nonStaticObject: [],   ====> Siguiente iteracion
@@ -70,7 +72,7 @@ const Game = {
 
         platforms.forEach(elm => this.objects.push(new Platforms(this.gameSize, this.gameScreen, elm, this.player)))
 
-        base.forEach(elm => this.bases.push(new Base(this.gameSize, this.gameScreen, elm, this.player)))
+        //base.forEach(elm => this.bases.push(new Base(this.gameSize, this.gameScreen, elm, this.player)))
 
         /*  ====> Siguiente iteracion <====
         nonStaticPlatform.forEach(elm => {
@@ -92,33 +94,39 @@ const Game = {
         this.player.move(this.keys)
         this.bases.forEach(elm => elm.move(this.keys))
         this.objects.forEach(elm => elm.move(this.keys))
-        if (this.checkCollision()) {
-            console.log(true)
+        this.checkPlatform()
+        this.isCollision()
+    },
+    /*isCollision() {
+        this.isOnPlatform = this.objects.some(eachObj => {
+            return (eachObj.position.horizontalPos < this.player.playerPos.left + this.player.playerSize.w &&
+                eachObj.position.horizontalPos + eachObj.platformSize.width > this.player.playerPos.left &&
+                //eachObj.position.verticalPos < this.player.playerPos.top + this.player.playerSize.h // esta debajo
+                eachObj.position.verticalPos > this.player.playerPos.top)
+        })
+        console.log(this.isOnPlatform)
+    },*/
+    isCollision() {
+        if (this.isOnPlatform) {
+            console.log(this.currentPlatform)
+            //this.player.base = this.currentPlatform.position.verticalPos
+        } else {
+            this.player.base = this.gameSize.h - this.player.playerSize.h - 50
         }
     },
 
-    checkCollision() {
-        console.log("mi base es", this.player.playerPos.base)
-        let flag = false
-        this.objects.forEach((elm, index) => {
-            if (this.player.playerPos.left + this.player.playerSize.w >= elm.position.horizontalPos &&
-                this.player.playerPos.left <= elm.position.horizontalPos + elm.platformSize.width &&
-                this.player.playerPos.top + this.player.playerSize.h < elm.position.verticalPos
-            ) {
-                this.player.playerPos.base = this.objects[index].position.verticalPos - this.player.playerSize.h
-                //console.log("estoy encima de la plataforma ", index, "y mi base es", this.player.playerPos.base)
-                flag = true
-            } else if (
-                this.player.playerPos.left + this.player.playerSize.w < elm.position.horizontalPos &&
-                this.player.playerPos.left > elm.position.horizontalPos + elm.platformSize.width) {
-                this.player.playerPos.base = this.player.gameSize.h - this.player.playerSize.h - 50
+    checkPlatform() {
+        this.objects.some(eachObj => {
+            if (eachObj.position.horizontalPos < this.player.playerPos.left + this.player.playerSize.w &&
+                eachObj.position.horizontalPos + eachObj.platformSize.width > this.player.playerPos.left &&
+                //eachObj.position.verticalPos < this.player.playerPos.top + this.player.playerSize.h // esta debajo
+                eachObj.position.verticalPos > this.player.playerPos.top) {
+                this.isOnPlatform = true
+                this.checkPlatform = eachObj
+                console.log(this.isOnPlatform)
             }
         })
-        return flag
     }
-    //gameOver() {
-    //alert('GAME OVER')
-    //}
 }
 
 // this.nonStaticObject.forEach(elm => {
