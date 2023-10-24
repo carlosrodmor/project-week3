@@ -5,7 +5,7 @@ class Platforms {
         this.playerReference = player
         this.position = { horizontalPos: platform.x, verticalPos: platform.y }
         this.platformSize = { width: platform.w, heigth: platform.h }
-        this.speed = 10
+        this.speed = 8
         this.init()
     }
     init() {
@@ -23,7 +23,7 @@ class Platforms {
     }
 
     moveRight() {
-        if (this.playerReference.playerPos.left >= this.gameSize.w / 2) {
+        if (this.playerReference.playerPos.left >= this.gameSize.w * .3) {
             this.position.horizontalPos -= this.speed
             this.updatePos()
         }

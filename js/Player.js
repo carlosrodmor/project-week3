@@ -1,11 +1,8 @@
 class Player {
     constructor(gameSize, gameScreen, keys) {
-        console.log(gameSize.h)
         this.gameSize = gameSize
         this.gameScreen = gameScreen
         this.keys = keys
-
-
         this.playerSize = {
             w: 60,
             h: 60,
@@ -14,22 +11,16 @@ class Player {
             left: 30,
             top: this.gameSize.h - this.playerSize.h - 50,
         }
-
         this.base = this.gameSize.h - this.playerSize.h - 50
-
         this.playerVel = {
             left: 8,
-            top: 250,
+            top: 0,
             gravity: 1,
-            maxVel: 250 + this.playerSize.h
+            jumpSpeed: 250
         }
-
         this.init()
     }
-
     init() {
-
-
         this.playerElement = document.createElement("div")
         this.playerElement.style.backgroundColor = "black"
         this.playerElement.style.position = "absolute"
@@ -37,7 +28,6 @@ class Player {
         this.playerElement.style.height = `${this.playerSize.h}px`
         this.playerElement.style.left = `${this.playerPos.left}px`
         this.playerElement.style.top = `${this.playerPos.top}px`
-
         this.gameScreen.appendChild(this.playerElement)
         this.playerElement.setAttribute("id", "player")
     }
@@ -46,44 +36,32 @@ class Player {
             this.playerPos.left -= this.playerVel.left
             this.updatePosition()
         }
-
     }
     moveRight() {
-        if (this.playerPos.left <= this.gameSize.w - this.playerSize.w - 30) {
+        if (this.playerPos.left <= this.gameSize.w * .7) {
             this.playerPos.left += this.playerVel.left
             this.updatePosition()
         }
-
     }
-    //si el bicho esta en la base, 
+
     jump() {
-        if (this.onBase()) {
-            this.playerPos.top -= this.playerVel.top      //da un salto 
-            this.playerVel.top = 5       //velocidad de salto = 1
-            this.updatePosition()
-        }
+        this.playerPos.top -= this.playerVel.jumpSpeed;
+        this.playerVel.top -= 10;
     }
     onBase() {
         return (this.playerPos.top) >= this.base
     }
-
-
     move(keys) {
         if (!this.onBase()) {
             this.playerVel.top += this.playerVel.gravity;
             this.playerPos.top += this.playerVel.top
-
-        } else if (this.playerVel.top < this.playerVel.maxVel) {  //si llega a la base recupera su fuerza de salto
-            this.playerVel.top = this.playerVel.maxVel
+        } else {
+            this.playerVel.top = 1
         }
-
         keys.RIGHT.pressed && this.moveRight()
         keys.LEFT.pressed && this.moveLeft()
-
         this.updatePosition()
-
     }
-
     updatePosition() {
         this.playerElement.style.left = `${this.playerPos.left}px`
         this.playerElement.style.top = `${this.playerPos.top}px `
