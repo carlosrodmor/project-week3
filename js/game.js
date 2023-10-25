@@ -8,7 +8,7 @@ const Game = {
     background: undefined,
     objects: [],
     enemies: undefined,
-
+    bonuses: undefined,
     onFloor: true,
     keys: {
         LEFT: { code: "ArrowLeft", pressed: false },
@@ -56,14 +56,16 @@ const Game = {
         }
     },
     createObjects() {
-        this.background = new Background(this.gameSize, this.gameScreen)
         this.player = new Player(this.gameSize, this.gameScreen)
+        this.background = new Background(this.gameSize, this.gameScreen, this.player)
         const platform0pos = { w: 100000, h: 50, x: 0, y: this.gameSize.h - 50 }
         const platform0 = new Platforms(this.gameSize, this.gameScreen, platform0pos, this.player)
         this.objects.push(platform0)
         this.enemies = []
-
         platforms.forEach(elm => this.objects.push(new Platforms(this.gameSize, this.gameScreen, elm, this.player)))
+        this.bonuses = []
+        this.healthBar = new Health(this.gameScreen, this.gameSize, this.player)
+
     },
     start() {
         this.createObjects()
@@ -73,7 +75,10 @@ const Game = {
         this.frameCounter > 5000 ? this.frameCounter = 0 : this.frameCounter++
         this.moveAll()
         this.generateEnemies()
+        this.generatePowerUp()
         this.clearAll()
+        this.gameOver()
+        console.log(this.powerup)
         window.requestAnimationFrame(() => this.gameLoop())
 
     },
@@ -81,9 +86,15 @@ const Game = {
         this.isCollision()
         this.isCollisionDown()
         this.enemyCollision()
-        this.player.move(this.keys)
+        this.powerUpCollision()
+        this.player.move(this.keys, this.frameCounter)
+        this.background.move(this.keys)
         this.objects.forEach(elm => elm.move(this.keys))
-        this.enemies.forEach(elm => elm.move())
+        this.enemies.forEach(elm => elm.move(this.frameCounter))
+        this.bonuses.forEach(elm => elm.move(this.keys, this.frameCounter))
+
+
+
     },
     isCollision() {
         this.objects.forEach(eachPlatform => {
@@ -119,11 +130,10 @@ const Game = {
                 playerRight > platformLeft + 10 &&
                 playerHead > platformTop - 10 &&
                 playerBottom > platformTop) {
-                //console.log("ABAJO de la plataforma", platformBottom, "cabeza", playerHead, "Salto", this.player.playerVel.jumpSpeed)
-
                 if (this.player.playerVel.jumpSpeed > playerHead - platformBottom) {
                     this.player.playerVel.jumpSpeed = playerHead - platformBottom
                     this.player.playerVel.top = 10
+                    //console.log(this.player.playerVel.jumpSpeed)
                 } else {
                     this.player.playerVel.jumpSpeed = 250
                 }
@@ -139,6 +149,7 @@ const Game = {
         let playerRight = this.player.playerPos.left + this.player.playerSize.w
         let playerHead = this.player.playerPos.top
         let playerBottom = this.player.playerSize.h + this.player.playerPos.top
+        let playerleft = this.player.playerPos.left
 
         this.enemies.forEach(eachEnemy => {
             let enemyLeft = eachEnemy.enemiesPos.x
@@ -146,20 +157,52 @@ const Game = {
             let enemyTop = eachEnemy.enemiesPos.y
             let enemyBottom = eachEnemy.enemiesPos.y + eachEnemy.enemiesSize.y
 
-            if (playerRight >= enemyLeft + 10 && playerHead >= enemyBottom + 5 && playerBottom <= enemyTop - 5) {
-
-                console.log(playerBottom, enemyBottom)
+            if (
+                enemyLeft <= playerRight &&
+                enemyTop <= playerBottom &&
+                enemyBottom >= playerHead &&
+                enemyRight >= playerleft
+            ) {
+                this.player.health -= 1
+                eachEnemy.enemiesElement.remove()
+                console.log(this.player.health)
             }
         })
-
-
     },
     generateEnemies() {
         if (this.frameCounter % this.density === 0) {
-            this.enemies.push(new Enemies(this.gameSize, this.gameScreen, this.player))
-            //console.log(this.enemies)
+            this.enemies.push(new Enemies(this.gameSize, this.gameScreen))
         }
     },
+
+    generatePowerUp() {
+        if (this.frameCounter % (this.density * 6) === 0) {
+            console.log("POWER UP")
+            this.bonuses.push(new PowerUp(this.gameScreen, this.gameSize, this.player))
+        }
+    },
+    powerUpCollision() {
+        let playerRight = this.player.playerPos.left + this.player.playerSize.w
+        let playerHead = this.player.playerPos.top
+        let playerBottom = this.player.playerSize.h + this.player.playerPos.top
+        let playerleft = this.player.playerPos.left
+        this.bonuses.forEach(eachPowerUp => {
+            let powerUpLeft = eachPowerUp.position.x
+            let powerUpRight = eachPowerUp.position.x + eachPowerUp.powerUpSize.w
+            let powerUpTop = eachPowerUp.position.y
+            let powerUpBottom = eachPowerUp.position.y + eachPowerUp.powerUpSize.h
+            if (
+                powerUpLeft <= playerRight &&
+                powerUpTop <= playerBottom &&
+                powerUpBottom >= playerHead &&
+                powerUpRight >= playerleft
+            ) {
+                alert("BONUS")
+
+            }
+        })
+    },
+
     clearAll() {
         this.enemies.forEach((elm, idx) => {
             if (elm.enemiesPos.x <= 0) {
@@ -167,5 +210,23 @@ const Game = {
                 this.enemies.splice(idx, 1)
             }
         })
-    }
+        this.bonuses.forEach((elm, idx) => {
+            if (elm.position.x <= 0) {
+                elm.powerUpElement.remove()
+                this.bonuses.splice(idx, 1)
+            }
+        })
+
+
+    },
+    gameOver() {
+        if (this.player.health === 0) {
+            alert("MUERTE")
+        }
+        if (this.player.playerPos.top + this.player.playerSize.h >= this.gameSize.h - 80) {
+            alert("FLOOR")
+        }
+    },
+
+
 }

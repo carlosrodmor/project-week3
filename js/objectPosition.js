@@ -1,9 +1,9 @@
 const platforms = [
 
     platform1 = {
-        w: 200,
+        w: 400,
         h: 50,
-        x: 200,
+        x: 0,
         y: 650
     },
     platform2 = {
