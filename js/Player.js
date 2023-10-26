@@ -4,8 +4,8 @@ class Player {
         this.gameScreen = gameScreen
         this.keys = keys
         this.playerSize = {
-            w: 60,
-            h: 60,
+            w: 75,
+            h: 75,
         }
         this.playerPos = {
             left: 30,

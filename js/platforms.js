@@ -11,8 +11,10 @@ class Platforms {
     init() {
 
         this.platformElement = document.createElement("figure")
-        this.platformElement.style.backgroundImage = "url('./img/platform.png')"
-        this.platformElement.style.backgroundSize = "cover"
+        this.platformElement.style.backgroundImage = "url('./img/Pad_1_3.png')"
+        this.platformElement.style.backgroundSize = "100%"
+
+        this.platformElement.style.backgroundRepeat = "no-repeat"
         this.platformElement.style.position = "absolute"
         this.platformElement.style.width = `${this.platformSize.width}px`
         this.platformElement.style.height = `${this.platformSize.heigth}px`

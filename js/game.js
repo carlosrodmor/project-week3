@@ -5,22 +5,29 @@ const Game = {
         h: window.innerHeight
     },
     player: undefined,
+    healthBar: undefined,
     background: undefined,
     objects: [],
     enemies: undefined,
     bonuses: undefined,
     onFloor: true,
+    framesID: undefined,
+    startGame: undefined,
     keys: {
         LEFT: { code: "ArrowLeft", pressed: false },
         RIGHT: { code: "ArrowRight", pressed: false },
-        UP: { code: "ArrowUp" }
+        UP: { code: "ArrowUp" },
+        ENTER: { code: "Enter", pressed: false },
+        SPACE: { code: "Space", pressed: false },
     },
     frameCounter: 0,
-    density: 50,
+    density: 80,
     init() {
+        console.log(this.keys.ENTER.pressed)
         this.setDimensions()
         this.setEventListeners()
-        this.start()
+        this.startScreen()
+        //this.start()
     },
     setDimensions() {
         this.gameScreen.style.width = `${this.gameSize.w}px`
@@ -28,7 +35,6 @@ const Game = {
     },
     setEventListeners() {
         document.onkeydown = (e) => {
-            //console.log("Tecla presionada")
             switch (e.code) {
                 case this.keys.RIGHT.code:
                     this.keys.RIGHT.pressed = true
@@ -42,6 +48,13 @@ const Game = {
                         this.onFloor = false
                     }
                     break;
+                case this.keys.ENTER.code:
+                    this.keys.ENTER.pressed = true
+                    this.start()
+                    this.startGame.hide()
+                    break;
+                case this.keys.SPACE.code:
+                    location.reload()
             }
             document.onkeyup = (e) => {
                 switch (e.code) {
@@ -65,28 +78,46 @@ const Game = {
         platforms.forEach(elm => this.objects.push(new Platforms(this.gameSize, this.gameScreen, elm, this.player)))
         this.bonuses = []
         this.healthBar = new Health(this.gameScreen, this.gameSize, this.player)
-
+        this.createSounds()
+        this.meta = new Meta(this.gameSize, this.gameScreen, { w: 100, h: 100, x: 7500, y: 200 }, this.player)
+    },
+    createSounds() {
+        this.soundHit = new Sounds(this.gameScreen, "./sounds/enemy.mp3")
+        this.powerUpSound = new Sounds(this.gameScreen, "./sounds/bonus.mp3")
+        this.gameOverSound = new Sounds(this.gameScreen, "./sounds/game over.mp3")
+        this.metaSound = new Sounds(this.gameScreen, "./sounds/meta.mp3")
+        this.gameSound = new Sounds(this.gameScreen, "./sounds/game.mp3")
+        this.levelSound = new Sounds(this.gameScreen, "./sounds/levelUp.mp3")
     },
     start() {
+        //this.winScreen = new WinScreen(this.gameSize, this.gameScreen)
         this.createObjects()
         this.gameLoop()
+        this.gameSound.play()
     },
     gameLoop() {
-        this.frameCounter > 5000 ? this.frameCounter = 0 : this.frameCounter++
-        this.moveAll()
-        this.generateEnemies()
-        this.generatePowerUp()
-        this.clearAll()
-        this.gameOver()
-        console.log(this.powerup)
-        window.requestAnimationFrame(() => this.gameLoop())
+        if (this.keys.ENTER.pressed) {
+            this.frameCounter > 5000 ? this.frameCounter = 0 : this.frameCounter++
+            this.moveAll()
+            this.generateEnemies()
+            this.generatePowerUp()
+            this.clearAll()
+            this.levelUp()
+            this.gameOver()
+            this.framesID = window.requestAnimationFrame(() => this.gameLoop())
+        }
 
     },
+
     moveAll() {
         this.isCollision()
         this.isCollisionDown()
         this.enemyCollision()
         this.powerUpCollision()
+        this.meta.move(this.keys)
+        if (this.meta.metaCollision()) {
+            this.winGame()
+        }
         this.player.move(this.keys, this.frameCounter)
         this.background.move(this.keys)
         this.objects.forEach(elm => elm.move(this.keys))
@@ -131,6 +162,7 @@ const Game = {
                 playerHead > platformTop - 10 &&
                 playerBottom > platformTop) {
                 if (this.player.playerVel.jumpSpeed > playerHead - platformBottom) {
+                    //playerHead = platformBottom
                     this.player.playerVel.jumpSpeed = playerHead - platformBottom
                     this.player.playerVel.top = 10
                     //console.log(this.player.playerVel.jumpSpeed)
@@ -164,22 +196,12 @@ const Game = {
                 enemyRight >= playerleft
             ) {
                 this.player.health -= 1
+                this.healthBar.healthControl()
+                this.soundHit.play()
                 eachEnemy.enemiesElement.remove()
-                console.log(this.player.health)
+                //console.log(this.player.health)
             }
         })
-    },
-    generateEnemies() {
-        if (this.frameCounter % this.density === 0) {
-            this.enemies.push(new Enemies(this.gameSize, this.gameScreen))
-        }
-    },
-
-    generatePowerUp() {
-        if (this.frameCounter % (this.density * 6) === 0) {
-            console.log("POWER UP")
-            this.bonuses.push(new PowerUp(this.gameScreen, this.gameSize, this.player))
-        }
     },
     powerUpCollision() {
         let playerRight = this.player.playerPos.left + this.player.playerSize.w
@@ -197,10 +219,26 @@ const Game = {
                 powerUpBottom >= playerHead &&
                 powerUpRight >= playerleft
             ) {
-                alert("BONUS")
-
+                if (this.player.health < 36) {
+                    this.player.health += 1
+                    this.healthBar.healthControl()
+                    this.powerUpSound.play()
+                    eachPowerUp.powerUpElement.remove()
+                }
             }
         })
+    },
+
+    generateEnemies() {
+        if (this.frameCounter % this.density === 0) {
+            this.enemies.push(new Enemies(this.gameSize, this.gameScreen))
+        }
+    },
+
+    generatePowerUp() {
+        if (this.frameCounter % (this.density * 6) === 0) {
+            this.bonuses.push(new PowerUp(this.gameScreen, this.gameSize, this.player))
+        }
     },
 
     clearAll() {
@@ -217,16 +255,36 @@ const Game = {
             }
         })
 
-
     },
     gameOver() {
-        if (this.player.health === 0) {
-            alert("MUERTE")
-        }
-        if (this.player.playerPos.top + this.player.playerSize.h >= this.gameSize.h - 80) {
-            alert("FLOOR")
+        if (this.player.health === 0 ||
+            this.player.playerPos.top + this.player.playerSize.h >= this.gameSize.h - 60) {
+            this.levelSound.pause()
+            this.gameSound.pause()
+            this.gameOverSound.play()
+            new GameoverScreen(this.gameSize, this.gameScreen)
+            this.keys.ENTER.pressed = false
         }
     },
 
-
+    startScreen() {
+        this.startGame = new StartScreen(this.gameScreen, this.gameSize)
+    },
+    levelUp() {
+        if (this.player.playerPos.left > this.objects[18].position.horizontalPos) {
+            this.gameSound.volume -= 0.5
+            this.levelSound.play()
+            this.density = 50
+            this.levelIcon = new LevelUp(this.gameScreen, this.gameSize)
+            console.log(this.density)
+        }
+    },
+    winGame() {
+        this.levelSound.pause()
+        this.gameSound.pause()
+        this.metaSound.play()
+        this.keys.ENTER.pressed = false
+        this.levelIcon.hide()
+        this.winScreen = new WinScreen(this.gameSize, this.gameScreen)
+    }
 }
