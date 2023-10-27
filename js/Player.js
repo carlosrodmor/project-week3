@@ -9,7 +9,7 @@ class Player {
         }
         this.playerPos = {
             left: 30,
-            top: this.gameSize.h - this.playerSize.h - 50,
+            top: this.gameSize.h - this.playerSize.h - 500,
         }
         this.base = this.gameSize.h - this.playerSize.h - 50
         this.playerVel = {
